@@ -1,0 +1,51 @@
+{
+    "name": "Zolinga MySQL Database",
+    "version": "1.0",
+    "description": "Provides the MySQL access service $api->db .",
+    "authors": [
+        "Danny Sevcik <danny@zolinga.net>"
+    ],
+    "attributes": {},
+    "listen": [
+        {
+            "description": "MySQL DB service $api->db providing SQL query API.",
+            "service": "db",
+            "class": "\\Zolinga\\Database\\DbService",
+            "origin": [
+                "internal"
+            ],
+            "priority": 0.5
+        },
+        {
+            "description": "Executes *.sql installation and update scripts.",
+            "event": "system:install:script:sql",
+            "class": "\\Zolinga\\Database\\InstallSqlScript",
+            "method": "onInstall",
+            "origin": [
+              "internal"
+            ],
+            "priority": 0.5
+          },
+          {
+            "description": "The simple key-value store $api->registry.",
+            "service": "registry",
+            "class": "\\Zolinga\\Database\\RegistryService",
+            "origin": [
+                "internal"
+            ],
+            "priority": 0.5
+          }
+    ],
+    "autoload": {
+        "Zolinga\\Database\\": "src/"
+    },
+    "config": {
+        "# database": "Configure the database connection for $api->db service. You want to override these settings in ./config/local.json or ./config/global.json config file.",
+        "database": {
+            "host": "",
+            "user": "",
+            "password": "",
+            "database": ""
+        }
+    }
+}
