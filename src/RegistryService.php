@@ -274,7 +274,7 @@ class RegistryService implements ServiceInterface
             return null;
         }
 
-        // $api->db->query("REPLACE INTO registry SET `name`=" . $api->db->escapeString($name, true) . ", `val`=" . $valueSQL);
+        // $api->db->query("REPLACE INTO registry SET `name`=" . $api->db->quoteString($name, true) . ", `val`=" . $valueSQL);
         $q = "
             INSERT INTO 
                 registry (`name`, `json`, `hash`) 

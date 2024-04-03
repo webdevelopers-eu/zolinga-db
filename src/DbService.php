@@ -177,11 +177,11 @@ class DbService implements ServiceInterface
                     $paramsExpanded = [...$paramsExpanded, ...$param];
                     return implode(', ', array_fill(0, count($param), '?'));
                 } elseif ($matches['quote'] == '`') { // Expand to `key`, `key`, ...
-                    return implode(', ', array_map(fn ($v) => $this->escapeIdentifier((string) $this->paramToScalar($v), true), $param));
+                    return implode(', ', array_map(fn ($v) => $this->quoteIdentifier((string) $this->paramToScalar($v)), $param));
                 } else { // Expand to `key1` = ?, `key2` = ?, ...
                     $paramsExpanded = [...$paramsExpanded, ...array_values($param)];
                     return implode(', ', array_map(
-                        fn ($k) => is_string($k) ? $this->escapeIdentifier($k, true) . ' = ?' : throw new InvalidArgumentException("Invalid parameter in the query \"$k\". The keys must be a colum names in array: " . json_encode($param) . " . The positional argument {$matches[0]} will be expanded to `key` = ?, `key` = ? and so on! Did you mean to use \"`??`\" or \"'??'\" instead of \"{$matches[0]}\" ?"),
+                        fn ($k) => is_string($k) ? $this->quoteIdentifier($k) . ' = ?' : throw new InvalidArgumentException("Invalid parameter in the query \"$k\". The keys must be a colum names in array: " . json_encode($param) . " . The positional argument {$matches[0]} will be expanded to `key` = ?, `key` = ? and so on! Did you mean to use \"`??`\" or \"'??'\" instead of \"{$matches[0]}\" ?"),
                         array_keys($param)
                     ));
                 }
@@ -284,7 +284,7 @@ class DbService implements ServiceInterface
      * @param boolean $addQuotes
      * @return string
      */
-    public function escapeIdentifier(string $value, bool $addQuotes = false): string
+    public function quoteIdentifier(string $value, bool $addQuotes = true): string
     {
         $ret = str_replace('`', '``', $value);
         return $addQuotes ? "`$ret`" : $ret;
@@ -297,7 +297,7 @@ class DbService implements ServiceInterface
      * @param boolean $addQuotes
      * @return string
      */
-    public function escapeString(string $value, bool $addQuotes = false): string
+    public function quoteString(string $value, bool $addQuotes = true): string
     {
         $ret = $this->conn->real_escape_string($value);
         return $addQuotes ? "'$ret'" : $ret;
