@@ -277,11 +277,11 @@ class DbService implements ServiceInterface
         return $ret;
     }
 
-    public function escapeString(string $value, string $extraEscChars = ''): string
+    public function escapeString(string $value, bool $isIdentifier = false): string
     {
         $ret = $this->conn->real_escape_string($value);
-        if ($extraEscChars) {
-            $ret = addcslashes($ret, $extraEscChars);
+        if ($isIdentifier) {
+            $ret = str_replace('`', '``', $ret);
         }
         return $ret;
     }
