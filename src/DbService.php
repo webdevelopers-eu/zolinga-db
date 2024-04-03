@@ -177,7 +177,7 @@ class DbService implements ServiceInterface
                     $paramsExpanded = [...$paramsExpanded, ...$param];
                     return implode(', ', array_fill(0, count($param), '?'));
                 } elseif ($matches['quote'] == '`') { // Expand to `key`, `key`, ...
-                    return implode(', ', array_map(fn ($v) => '`' . $this->escapeString((string) $this->paramToScalar($v)) . '`', $param));
+                    return implode(', ', array_map(fn ($v) => '`' . $this->escapeString((string) $this->paramToScalar($v), '`') . '`', $param));
                 } else { // Expand to `key1` = ?, `key2` = ?, ...
                     $paramsExpanded = [...$paramsExpanded, ...array_values($param)];
                     return implode(', ', array_map(
@@ -277,9 +277,13 @@ class DbService implements ServiceInterface
         return $ret;
     }
 
-    public function escapeString(string $value): string
+    public function escapeString(string $value, string $extraEscChars = ''): string
     {
-        return $this->conn->real_escape_string($value);
+        $ret = $this->conn->real_escape_string($value);
+        if ($extraEscChars) {
+            $ret = addcslashes($ret, $extraEscChars);
+        }
+        return $ret;
     }
 
     public function getLastInsertId(): int|string
