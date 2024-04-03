@@ -177,11 +177,11 @@ class DbService implements ServiceInterface
                     $paramsExpanded = [...$paramsExpanded, ...$param];
                     return implode(', ', array_fill(0, count($param), '?'));
                 } elseif ($matches['quote'] == '`') { // Expand to `key`, `key`, ...
-                    return implode(', ', array_map(fn ($v) => '`' . $this->escapeString((string) $this->paramToScalar($v), '`') . '`', $param));
+                    return implode(', ', array_map(fn ($v) => $this->escapeIdentifier((string) $this->paramToScalar($v), true), $param));
                 } else { // Expand to `key1` = ?, `key2` = ?, ...
                     $paramsExpanded = [...$paramsExpanded, ...array_values($param)];
                     return implode(', ', array_map(
-                        fn ($k) => is_string($k) ? '`' . $this->escapeString($k) . '` = ?' : throw new InvalidArgumentException("Invalid parameter in the query \"$k\". The keys must be a colum names in array: " . json_encode($param) . " . The positional argument {$matches[0]} will be expanded to `key` = ?, `key` = ? and so on! Did you mean to use \"`??`\" or \"'??'\" instead of \"{$matches[0]}\" ?"),
+                        fn ($k) => is_string($k) ? $this->escapeIdentifier($k, true) . ' = ?' : throw new InvalidArgumentException("Invalid parameter in the query \"$k\". The keys must be a colum names in array: " . json_encode($param) . " . The positional argument {$matches[0]} will be expanded to `key` = ?, `key` = ? and so on! Did you mean to use \"`??`\" or \"'??'\" instead of \"{$matches[0]}\" ?"),
                         array_keys($param)
                     ));
                 }
@@ -277,15 +277,37 @@ class DbService implements ServiceInterface
         return $ret;
     }
 
-    public function escapeString(string $value, bool $isIdentifier = false): string
+    /**
+     * Escapes the identifier (table or column name) and optionally adds quotes.
+     *
+     * @param string $value
+     * @param boolean $addQuotes
+     * @return string
+     */
+    public function escapeIdentifier(string $value, bool $addQuotes = false): string
     {
-        $ret = $this->conn->real_escape_string($value);
-        if ($isIdentifier) {
-            $ret = str_replace('`', '``', $ret);
-        }
-        return $ret;
+        $ret = str_replace('`', '``', $value);
+        return $addQuotes ? "`$ret`" : $ret;
     }
 
+    /**
+     * Escapes the string and optionally adds quotes.
+     *
+     * @param string $value
+     * @param boolean $addQuotes
+     * @return string
+     */
+    public function escapeString(string $value, bool $addQuotes = false): string
+    {
+        $ret = $this->conn->real_escape_string($value);
+        return $addQuotes ? "'$ret'" : $ret;
+    }
+
+    /**
+     * Get the last insert id.
+     *
+     * @return integer|string
+     */
     public function getLastInsertId(): int|string
     {
         return $this->conn->insert_id;
