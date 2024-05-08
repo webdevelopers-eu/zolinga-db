@@ -152,16 +152,16 @@ class DbService implements ServiceInterface
      *     "username" => "test@example.com",
      *     "password" => "123456",
      *   ];
-     *   $api->db->expandQuery("INSERT INTO rmsUsers (`??`) VALUES ('??')", array_keys($data), $data);
+     *   $api->db->queryExpand("INSERT INTO rmsUsers (`??`) VALUES ('??')", array_keys($data), $data);
      * 
-     *   $api->db->expandQuery("INSERT INTO table SET ?? WHERE id = ?", ['key1' => 'value1', 'key2' => 'value2'], 123);
+     *   $api->db->queryExpand("INSERT INTO table SET ?? WHERE id = ?", ['key1' => 'value1', 'key2' => 'value2'], 123);
      * 
      * @throws Exception In case of any error.
      * @param string $sql The SQL query to execute.
      * @param int|float|string|null|Stringable|UnitEnum|bool|array<int|float|string|null|Stringable|UnitEnum|bool> ...$params The parameters to bind to the query.
      * @return DbResult|int The result of the SELECT query, or int number of affected rows for UPDATE|DELETE or last insert id for INSERT
      */
-    public function expandQuery(string $sql, array|int|float|string|null|Stringable|UnitEnum|bool ...$params): DbResult|int
+    public function queryExpand(string $sql, array|int|float|string|null|Stringable|UnitEnum|bool ...$params): DbResult|int
     {
         $processParams = $params;
         $paramsExpanded = [];

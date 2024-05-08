@@ -37,7 +37,7 @@ Also you can use also bind parameters to make sure the values are properly escap
  $this->query("SELECT * FROM table WHERE id = ?", $id);
 ```
 
-### expandQuery(string $sql, ...$params): array
+### queryExpand(string $sql, ...$params): array
 
 Same as `query()` but supports `??` to expand into multiple parameters or multiple values.
 
@@ -53,13 +53,13 @@ $data = [
     "password" => "123456",
 ];
 
-$api->db->expandQuery(
+$api->db->queryExpand(
     "INSERT INTO rmsUsers (`??`) VALUES ('??')", 
     array_keys($data), 
     $data
 );
 
-$api->db->expandQuery(
+$api->db->queryExpand(
     "INSERT INTO table SET ?? WHERE id = ?", 
     ['key1' => 'value1', 'key2' => 'value2'], 
     123

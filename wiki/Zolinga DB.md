@@ -46,7 +46,7 @@ $results = $api->db->multiQuery(<<<EOT
 
 ### Expanding SQL Queries
 
-The method `$api->db->expandQuery()` allows you to expand SQL queries with the values from the array.
+The method `$api->db->queryExpand()` allows you to expand SQL queries with the values from the array.
 
 It is same as `$api->db->query()` but supports `??` to expand into multiple parameters or multiple values.
 You can surround the with backticks, single or double quotes to expand into multiple parameters or multiple values.
@@ -66,14 +66,14 @@ $data = [
   "password" => "123456",
 ];
 
-$api->db->expandQuery(
+$api->db->queryExpand(
     "INSERT INTO rmsUsers (`??`) VALUES ('??')", 
     array_keys($data), 
     $data
 );
 // Executes: INSERT INTO rmsUsers (`username`, `password`) VALUES ('test@example.com', '123456')
 
-$api->db->expandQuery(
+$api->db->queryExpand(
     "INSERT INTO table SET ?? WHERE id = ?", 
     ['key1' => 'value1', 'key2' => 'value2'], 
     123
