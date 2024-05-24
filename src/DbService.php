@@ -85,7 +85,13 @@ class DbService implements ServiceInterface
     {
         global $api;
 
-        $stmt = $this->conn->prepare($sql);
+        try {
+            $stmt = $this->conn->prepare($sql);
+        } catch (Throwable $e) {
+            $api->log->error("db", "Error preparing query: " . $e->getMessage(), ['sql' => $sql, 'trace' => $e->getTraceAsString()]);
+            throw $e; // rethrow
+        }
+
         if ($stmt === false) {
             throw new Exception("Failed to prepare the query $sql: " . $this->conn->error);
         }
