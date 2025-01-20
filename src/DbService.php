@@ -30,7 +30,7 @@ use Exception, Throwable, InvalidArgumentException, Stringable;
  */
 class DbService implements ServiceInterface
 {
-    private \mysqli $conn;
+    private ?\mysqli $conn = null;
 
     public function __construct()
     {
@@ -46,10 +46,16 @@ class DbService implements ServiceInterface
         $credentials['password'] or throw new Exception("Missing MySQL password in the configuration!");
         $credentials['database'] or throw new Exception("Missing MySQL database in the configuration!");
 
-        $this->conn = new mysqli($credentials['host'], $credentials['user'], $credentials['password'], $credentials['database']);
-        if ($this->conn->connect_error) {
-            throw new Exception("Connection failed: " . $this->conn->connect_error);
+        try {
+            $this->conn = new mysqli($credentials['host'], $credentials['user'], $credentials['password'], $credentials['database']);
+        } catch (Throwable $e) {
+            trigger_error("Error connecting to MySQL: EXCEPTION[". get_class($e). "]: " . $e->getMessage(). ", CODE: " . $e->getCode() . ", host = {$credentials['host']}, user = {$credentials['user']}, database = {$credentials['database']}", E_USER_WARNING);
+            throw new Exception("DB Connection failed.", 500, $e); // this will bubble up to the front end.
         }
+        // if (!is_object($this->conn) || $this->conn->connect_error) {
+        //     trigger_error("Connection failed: " . $this->conn->connect_error, E_USER_WARNING);
+        //     throw new Exception("DB Connection failed."); // this will bubble up to the front end.
+        // }
     }
 
     /**
