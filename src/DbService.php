@@ -219,6 +219,8 @@ class DbService implements ServiceInterface
         if ($param instanceof Stringable) return (string) $param;
         if ($param instanceof BackedEnum) return $param->value;
         if ($param instanceof UnitEnum) return $param->name;
+        
+        throw new InvalidArgumentException("Invalid parameter type: " . gettype($param));
     }
 
     /**
