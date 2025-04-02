@@ -63,11 +63,12 @@ class DbResult implements \Iterator, \ArrayAccess
     /**
      * Fetches all rows from the result set as an array of associative arrays.
      *
+     * @param int $mode The fetch mode. Default is MYSQLI_ASSOC. Other options include MYSQLI_NUM and MYSQLI_BOTH.
      * @return array<array<string,mixed>> An array of associative arrays representing all rows in the result set.
      */
-    public function fetchAll(): array
+    public function fetchAll(int $mode = MYSQLI_ASSOC): array
     {
-        return $this->result->fetch_all(MYSQLI_ASSOC);
+        return $this->result->fetch_all($mode);
     }
 
     /**
