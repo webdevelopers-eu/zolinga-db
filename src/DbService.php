@@ -134,7 +134,8 @@ class DbService implements ServiceInterface
 
             $ret = $this->resultToObject($stmt->get_result(), $stmt);
         } catch (Throwable $e) {
-            $api->log->error("db", "Error executing query: " . $e->getMessage(), ['sql' => $sql, 'trace' => $e->getTraceAsString()]);
+            $api->log->error("db", "Error executing query: ".substr(trim($sql), 0, 128)." \nError: " . $e->getMessage(), 
+                ['sql' => $sql, 'params' => $params, 'trace' => $e->getTraceAsString()]);
             throw $e; // rethrow, show we log it somewhere here?
         } finally {
             $stmt->close();
