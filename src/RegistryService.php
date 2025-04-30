@@ -1,6 +1,8 @@
 <?php
 
 namespace Zolinga\Database;
+
+use JsonSerializable;
 use Zolinga\System\Events\ServiceInterface;
 
 /**
@@ -258,10 +260,10 @@ class RegistryService implements ServiceInterface
      *
      * @access public
      * @param string $name
-     * @param string|int|float|array<mixed>|null $value - if null unset the record from DB
+     * @param string|int|float|array<mixed>|null|JsonSerializable $value - if null unset the record from DB
      * @return string|int|float|array<mixed>|null $value
      */
-    public function set(string $name, string|int|float|array|null $value = null): string|int|float|array|null
+    public function set(string $name, string|int|float|array|null|JsonSerializable $value = null): string|int|float|array|null|JsonSerializable
     {
         global $api;
 
