@@ -74,6 +74,8 @@ class DbResult implements \Iterator, \ArrayAccess
     /**
      * Fetch all rows and use the first column as the key and the second column as the value.
      * 
+     * If the row has more then 2 columns, first value is used as key and rest is assigned as an associated array to that key.
+     * 
      * This is useful for creating a key-value pair array.
      * 
      * Example: 'select id, name from users' will return array(id => name, ...)
@@ -83,13 +85,21 @@ class DbResult implements \Iterator, \ArrayAccess
      */
     public function fetchKeyValueAll(): array 
     {
-        $rows = $this->fetchAll(MYSQLI_NUM);
+        $rows = $this->fetchAll(MYSQLI_ASSOC);
         $result = [];
         foreach ($rows as $row) {
-            if (count($row) < 2) {
-                throw new Exception("Row has less than 2 columns: " . print_r($row, true));
+            $key = array_shift($row); // Get the first column as key
+            switch (count($row)) {
+                case 0:
+                    throw new Exception("Row has less than 2 columns: " . print_r($row, true));
+                case 1:
+                    // If there are exactly 2 columns, use the first as key and second as value
+                    $result[$key] = reset($row);
+                    break;
+                default:
+                    // If there are more than 2 columns, use the first as key and rest as value array
+                    $result[$key] = $row;
             }
-            $result[$row[0]] = $row[1];
         }
         return $result;
     }
