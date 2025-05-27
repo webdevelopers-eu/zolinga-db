@@ -147,17 +147,19 @@ class DbService implements ServiceInterface
     /**
      * Same as query() but supports ?? to expand into multiple parameters or multiple values.
      * 
-     * You can surround the ?? with backticks, single or double quotes to expand into multiple parameters or multiple values.
+     * You can surround the ?? with backticks, single or double quotes to expand into multiple field names or multiple field values.
      * 
      * You can combine standard ? with ?? in the same query. But ?? must always map to array parameter while ? to scalar.
      *  
      * E.g. 
      * 
      *   INSERT INTO rmsUsers (`??`) VALUES ('??');
+     *   UPDATE rmsUsers SET ?? WHERE id = ?;
      * 
      * will expand into internally into
      * 
      *   INSERT INTO rmsUsers (`username`, `password`) VALUES (?, ?);
+     *   UPDATE rmsUsers SET `key1` = ?, `key2` = ? WHERE id = ?;
      * 
      * Example:
      * 
@@ -166,8 +168,7 @@ class DbService implements ServiceInterface
      *     "password" => "123456",
      *   ];
      *   $api->db->queryExpand("INSERT INTO rmsUsers (`??`) VALUES ('??')", array_keys($data), $data);
-     * 
-     *   $api->db->queryExpand("INSERT INTO table SET ?? WHERE id = ?", ['key1' => 'value1', 'key2' => 'value2'], 123);
+     *   $api->db->queryExpand("UPDATE table SET ?? WHERE id = ?", ['key1' => 'value1', 'key2' => 'value2'], 123);
      * 
      * @throws Exception In case of any error.
      * @param string $sql The SQL query to execute.
