@@ -68,7 +68,7 @@ class DbResult implements \Iterator, \ArrayAccess
      */
     public function fetchAll(int $mode = MYSQLI_ASSOC): array
     {
-        return $this->result->fetch_all($mode);
+        return $this->result->fetch_all($mode) ?? [];
     }
 
     /**
