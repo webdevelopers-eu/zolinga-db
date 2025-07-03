@@ -279,12 +279,12 @@ class RegistryService implements ServiceInterface
         // $api->db->query("REPLACE INTO registry SET `name`=" . $api->db->quoteString($name, true) . ", `val`=" . $valueSQL);
         $q = "
             INSERT INTO 
-                registry (`name`, `json`, `hash`) 
-            VALUES 
-                (?, ?, unhex(sha1(?))) 
+                registry (`name`, `json`, `hash`, `created`, `modified`) 
+            VALUES
+                (?, ?, unhex(sha1(?)), ?, ?) 
             ON DUPLICATE KEY UPDATE 
-                `json`= values(`json`);";
-        $res = $api->db->query($q, $name, json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), $name);
+                `json`= values(`json`), `modified`= values(`modified`);";
+        $res = $api->db->query($q, $name, json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), $name, time(), time());
         if ($res === false) {
             throw new \Exception("Cannot save Registry value for `$name`", 500);
         }
