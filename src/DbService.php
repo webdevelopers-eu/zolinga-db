@@ -86,6 +86,7 @@ class DbService implements ServiceInterface
      * @param string $sql The SQL query to execute.
      * @param int|float|string|Stringable|null|UnitEnum|bool ...$params The parameters to bind to the query.
      * @return DbResult|int The result of the SELECT query, or int number of affected rows for UPDATE|DELETE or last insert id for INSERT
+     *          For INSERT ... ON DUPLICATE KEY UPDATE it returns the existing ID if the value was updated and 0 if all the values are same as before.
      */
     public function query(string $sql, int|float|string|Stringable|null|UnitEnum|bool ...$params): DbResult|int
     {
