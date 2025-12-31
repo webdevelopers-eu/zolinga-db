@@ -39,17 +39,32 @@ class DbService implements ServiceInterface
 
     private function connect(): void
     {
-        $credentials = $this->getCredentials();
+        $settings = $this->getSettings();
 
-        $credentials['host'] or throw new Exception("Missing MySQL host in the configuration!");
-        $credentials['user'] or throw new Exception("Missing MySQL user in the configuration!");
-        $credentials['password'] or throw new Exception("Missing MySQL password in the configuration!");
-        $credentials['database'] or throw new Exception("Missing MySQL database in the configuration!");
+        $settings['host'] or throw new Exception("Missing MySQL host in the configuration!");
+        $settings['user'] or throw new Exception("Missing MySQL user in the configuration!");
+        $settings['password'] or throw new Exception("Missing MySQL password in the configuration!");
+        $settings['database'] or throw new Exception("Missing MySQL database in the configuration!");
 
         try {
-            $this->conn = new mysqli($credentials['host'], $credentials['user'], $credentials['password'], $credentials['database']);
+            $this->conn = new mysqli(
+                $settings['host'], 
+                $settings['user'], 
+                $settings['password'], 
+                $settings['database'], 
+                (int)$settings['port'] ?? 3306
+            );
+            if ($this->conn->connect_error) {
+                trigger_error("Connection failed: " . $this->conn->connect_error, E_USER_WARNING);
+                throw new Exception("DB Connection failed.", 500); // this will bubble up to the front end.
+            }
+            if ($settings['timeout'] ?? false) {
+                $this->conn->options(MYSQLI_OPT_CONNECT_TIMEOUT, (int)$settings['timeout']);
+                $this->conn->options(MYSQLI_OPT_READ_TIMEOUT, (int)$settings['timeout']);
+            }
+            $this->conn->set_charset('utf8mb4');
         } catch (Throwable $e) {
-            trigger_error("Error connecting to MySQL: EXCEPTION[". get_class($e). "]: " . $e->getMessage(). ", CODE: " . $e->getCode() . ", host = {$credentials['host']}, user = {$credentials['user']}, database = {$credentials['database']}", E_USER_WARNING);
+            trigger_error("Error connecting to MySQL: EXCEPTION[". get_class($e). "]: " . $e->getMessage(). ", CODE: " . $e->getCode() . ", host = {$settings['host']}, user = {$settings['user']}, database = {$settings['database']}", E_USER_WARNING);
             throw new Exception("DB Connection failed.", 500, $e); // this will bubble up to the front end.
         }
         // if (!is_object($this->conn) || $this->conn->connect_error) {
@@ -63,7 +78,7 @@ class DbService implements ServiceInterface
      *
      * @return array{host: string, user: string, password: string, database: string}
      */
-    protected function getCredentials(): array
+    protected function getSettings(): array
     {
         global $api;
         $credentials = $api->config['database'] or throw new Exception("Missing database configuration in the configuration file!");
@@ -135,7 +150,9 @@ class DbService implements ServiceInterface
 
             $ret = $this->resultToObject($stmt->get_result(), $stmt);
         } catch (Throwable $e) {
-            $api->log->error("db", "Error executing query: ".substr(trim($sql), 0, 128)." \nError: " . get_class($e) ." #" . $e->getCode(). " " . $e->getMessage(), 
+            $api->log->error("db", 
+                "Error executing query: ".substr(trim($sql), 0, 128)." \nError: " . get_class($e) .
+                " #" . $e->getCode(). " " . $e->getMessage() . "\n" . $this->replaceParams($sql, $params),
                 ['sql' => $sql, 'params' => $params, 'trace' => $e->getTraceAsString()]);
             throw $e; // rethrow, show we log it somewhere here?
         } finally {
@@ -143,6 +160,24 @@ class DbService implements ServiceInterface
         }
 
         return $ret;
+    }
+
+    private function replaceParams(string $sql, array $params): string
+    {
+        foreach ($params as $param) {
+            $scalarParam = $this->paramToScalar($param);
+            if (is_string($scalarParam)) {
+                $escapedParam = $this->quoteString($scalarParam);
+            } elseif (is_null($scalarParam)) {
+                $escapedParam = 'NULL';
+            } elseif (is_bool($scalarParam)) {
+                $escapedParam = $scalarParam ? '1' : '0';
+            } else {
+                $escapedParam = (string) $scalarParam;
+            }
+            $sql = preg_replace('/\?/', $escapedParam, $sql, 1);
+        }
+        return $sql;
     }
 
     /**

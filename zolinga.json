@@ -45,7 +45,9 @@
             "host": "",
             "user": "",
             "password": "",
-            "database": ""
+            "database": "",
+            "port": 3306,
+            "timeout": null
         }
     }
 }
