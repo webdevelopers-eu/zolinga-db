@@ -36,6 +36,7 @@
             "priority": 0.5
           }
     ],
+    "emit": [],
     "autoload": {
         "Zolinga\\Database\\": "src/"
     },
