@@ -14,3 +14,13 @@ CREATE TABLE IF NOT EXISTS `registry` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Stores configuration data in a key-value pair format.';
 
 -- ========
+
+DROP TRIGGER IF EXISTS `before_update_registry`;
+
+CREATE TRIGGER `before_update_registry`
+BEFORE UPDATE ON registry
+FOR EACH ROW
+SET 
+NEW.modified = UNIX_TIMESTAMP(),
+NEW.created = IFNULL(OLD.created, UNIX_TIMESTAMP()) ;;
+DELIMITER ;
