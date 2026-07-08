@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `registry` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `hash` (`hash`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Stores configuration data in a key-value pair format.';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Stores configuration data in a key-value pair format.';
 
 -- ========
 

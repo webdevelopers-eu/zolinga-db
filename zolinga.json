@@ -1,6 +1,6 @@
 {
     "name": "Zolinga MySQL Database",
-    "version": "1.0",
+    "version": "1.1",
     "description": "Provides the MySQL access service $api->db .",
     "authors": [
         "Danny Sevcik <danny@zolinga.net>"
